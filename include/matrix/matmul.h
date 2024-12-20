@@ -33,8 +33,11 @@ void matmul(Matrix *m1, Matrix *m2, Matrix *output);
 Matrix create_matrix(int rows, int cols);
 
 /**
- * @brief Function to initialize a dynamically allocated matrix.
+ * @brief Initializes a dynamically allocated matrix by copying data from a 1D
+ * array.
  *
+ * @param matrix The matrix to be initialized (dynamically allocated).
+ * @param data The 1D array whose elements will be copied into the matrix.
  */
 void initialize_matrix(Matrix *matrix, const float *data);
 
@@ -45,4 +48,11 @@ void initialize_matrix(Matrix *matrix, const float *data);
  */
 void free_matrix(Matrix *m);
 
-#endif // MATMUL_H
+/**
+ * @brief Print a matrix.
+ *
+ * @param matrix The matrix to be printed.
+ */
+void print_matrix(Matrix *matrix);
+
+#endif // MATH_MATMUL_H

@@ -53,3 +53,13 @@ void free_matrix(Matrix *m) {
     }
     free(m->data);
 }
+
+// Print a matrix
+void print_matrix(Matrix *matrix) {
+    for (int i = 0; i < matrix->rows; ++i) {
+        for (int j = 0; j < matrix->cols; ++j) {
+            printf("%+8.2f", matrix->data[i][j]);
+        }
+        printf("\n");
+    }
+}
