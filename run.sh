@@ -15,8 +15,8 @@ if [ ! -f "build" ]; then
 
   # Delete unusual folders and files
   rm -rf CMakeFiles
-  rm -f cmake_install.cmake CMakeCache.txt main Makefile
-
+  rm -f *
+  
   # Check if CMakeLists.txt exists in the parent directory
   if [ ! -f "../CMakeLists.txt" ]; then
     echo "CMakeLists.txt not found in the parent directory. Exiting."
@@ -26,14 +26,6 @@ if [ ! -f "build" ]; then
   # Build and run the code
   cmake ..
   make
-
-  # Check if the executable 'main' was successfully built
-  if [ -f "./main" ]; then
-    ./main
-  else
-    echo "Executable 'main' not found. Build might have failed."
-    exit 1
-  fi
 else
   echo "'build' file exists. Checking contents..."
 
@@ -44,14 +36,6 @@ else
     # Build and run the code
     cmake ..
     make
-
-    # Check if the executable 'main' was successfully built
-    if [ -f "./main" ]; then
-      ./main
-    else
-      echo "Executable 'main' not found. Build might have failed."
-      exit 1
-    fi
   else
     echo "'build' file is not empty. Nothing to do."
   fi
