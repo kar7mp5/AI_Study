@@ -1,14 +1,27 @@
 cmake_minimum_required(VERSION 3.10)
+project(MatrixLibrary)
 
-project(main VERSION 1.0 LANGUAGES C)
+# Set the C standard version
+set(CMAKE_C_STANDARD 99)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+# Include the include directory for header files
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
-set(SOURCES
-    src/ConvolutionNeuralNetwork.c
+# Create a library for matrix operations
+add_library(matrix_lib
+    include/matrix/matmul.c
 )
 
-add_executable(main ${SOURCES})
+# Create the main executable and link it with the matrix library
+add_executable(main 
+    src/main.c
+)
 
-include_directories(include)
+# Link the library to the main executable
+target_link_libraries(main matrix_lib)
+
+# Add a custom command to run the program after building
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/main
+    COMMENT "Running the program after build"
+)
