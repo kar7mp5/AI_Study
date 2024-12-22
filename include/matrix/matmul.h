@@ -7,9 +7,9 @@
 
 // Define a struct to represent a matrix
 typedef struct {
-    int rows;     // Number of rows
-    int cols;     // Number of columns
-    float **data; // Pointer to the matrix data
+    int rows;      // Number of rows
+    int cols;      // Number of columns
+    double **data; // Pointer to the matrix data
 } Matrix;
 
 /**
@@ -39,7 +39,7 @@ Matrix create_matrix(int rows, int cols);
  * @param matrix The matrix to be initialized (dynamically allocated).
  * @param data The 1D array whose elements will be copied into the matrix.
  */
-void initialize_matrix(Matrix *matrix, const float *data);
+void initialize_matrix(Matrix *matrix, const double *data);
 
 /**
  * @brief Function to free the memory of a matrix.
@@ -47,6 +47,17 @@ void initialize_matrix(Matrix *matrix, const float *data);
  * @param m The matrix to free
  */
 void free_matrix(Matrix *m);
+
+/**
+ * @brief Transposes a given matrix.
+ *
+ * This function creates a new matrix that is the transpose of the input matrix.
+ * In the transposed matrix, rows become columns and columns become rows.
+ *
+ * @param matrix The input matrix to be transposed.
+ * @return A new matrix that is the transpose of the input matrix.
+ */
+Matrix transpose_matrix(Matrix *matrix);
 
 /**
  * @brief Print a matrix.

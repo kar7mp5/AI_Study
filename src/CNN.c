@@ -50,10 +50,8 @@ void initialize_random(float *data, int size) {
  * @param output The output matrix to store the convolution result. It has
  * dimensions.
  */
-void convolution(float input[INPUT_SIZE][INPUT_SIZE],
-                 float filter[HIDDEN_LAYER][HIDDEN_LAYER],
-                 float output[INPUT_SIZE - HIDDEN_LAYER + 1]
-                             [INPUT_SIZE - HIDDEN_LAYER + 1]) {
+void convolution(float input[INPUT_SIZE][INPUT_SIZE], float filter[HIDDEN_LAYER][HIDDEN_LAYER],
+                 float output[INPUT_SIZE - HIDDEN_LAYER + 1][INPUT_SIZE - HIDDEN_LAYER + 1]) {
     for (int rows = 0; rows < INPUT_SIZE - HIDDEN_LAYER + 1; ++rows) {
         for (int cols = 0; cols < INPUT_SIZE - HIDDEN_LAYER + 1; ++cols) {
             float sum = 0;
@@ -74,12 +72,9 @@ void convolution(float input[INPUT_SIZE][INPUT_SIZE],
  */
 void max_pooling(
     float input[INPUT_SIZE - HIDDEN_LAYER + 1][INPUT_SIZE - HIDDEN_LAYER + 1],
-    float output[(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE]
-                [(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE]) {
-    for (int rows = 0; rows < INPUT_SIZE - HIDDEN_LAYER + 1;
-         rows += POOL_SIZE) {
-        for (int cols = 0; cols < INPUT_SIZE - HIDDEN_LAYER + 1;
-             cols += POOL_SIZE) {
+    float output[(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE][(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE]) {
+    for (int rows = 0; rows < INPUT_SIZE - HIDDEN_LAYER + 1; rows += POOL_SIZE) {
+        for (int cols = 0; cols < INPUT_SIZE - HIDDEN_LAYER + 1; cols += POOL_SIZE) {
             float max = -INFINITY;
             for (int pi = 0; pi < POOL_SIZE; ++pi) {
                 for (int pj = 0; pj < POOL_SIZE; ++pj) {
@@ -101,8 +96,8 @@ void max_pooling(
  * @param bias The matrix of bias.
  * @param output The output matrix.
  */
-void fully_connected(float input[], float weights[OUTPUT_SIZE][INPUT_SIZE],
-                     float bias[OUTPUT_SIZE], float output[OUTPUT_SIZE]) {
+void fully_connected(float input[], float weights[OUTPUT_SIZE][INPUT_SIZE], float bias[OUTPUT_SIZE],
+                     float output[OUTPUT_SIZE]) {
     for (int i = 0; i < OUTPUT_SIZE; ++i) {
         output[i] = bias[i];
         for (int j = 0; j < INPUT_SIZE; ++j) {
@@ -151,8 +146,7 @@ void softmax(float *input, float *output, int n) {
 
     // Compute the exponentials of the adjusted values and their sum.
     for (int i = 0; i < n; i++) {
-        output[i] = my_exp(
-            input[i] - max_val); // Subtract max_val for numerical stability.
+        output[i] = my_exp(input[i] - max_val); // Subtract max_val for numerical stability.
         sum += output[i];
     }
 
@@ -187,12 +181,10 @@ int main() {
     print_layer((float *)hidden_layer, HIDDEN_LAYER, HIDDEN_LAYER);
 
     // Convolution Layer Output
-    float conv_output[INPUT_SIZE - HIDDEN_LAYER + 1]
-                     [INPUT_SIZE - HIDDEN_LAYER + 1];
+    float conv_output[INPUT_SIZE - HIDDEN_LAYER + 1][INPUT_SIZE - HIDDEN_LAYER + 1];
 
     // Max Pooling Output
-    float pooled_output[(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE]
-                       [(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE];
+    float pooled_output[(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE][(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE];
 
     // Fully Connected Layer Weights and Biases
     float fc_weights[OUTPUT_SIZE][INPUT_SIZE];
@@ -213,16 +205,13 @@ int main() {
     max_pooling(conv_output, pooled_output);
 
     printf("Convolution Layer Output\n");
-    print_layer((float *)conv_output, INPUT_SIZE - HIDDEN_LAYER + 1,
-                INPUT_SIZE - HIDDEN_LAYER + 1);
+    print_layer((float *)conv_output, INPUT_SIZE - HIDDEN_LAYER + 1, INPUT_SIZE - HIDDEN_LAYER + 1);
     printf("Pooled Output\n");
-    print_layer((float *)pooled_output,
-                (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE,
+    print_layer((float *)pooled_output, (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE,
                 (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE);
 
     // Flatten for Fully Connected Layer
-    float flattened[(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE *
-                    (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE];
+    float flattened[(INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE * (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE];
     int idx = 0;
     for (int i = 0; i < (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE; ++i) {
         for (int j = 0; j < (INPUT_SIZE - HIDDEN_LAYER + 1) / POOL_SIZE; ++j) {
