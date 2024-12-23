@@ -7,9 +7,9 @@
 
 // Define a struct to represent a matrix
 typedef struct {
-    int rows;      // Number of rows
-    int cols;      // Number of columns
-    double **data; // Pointer to the matrix data
+    int rows;     // Number of rows
+    int cols;     // Number of columns
+    double *data; // Pointer to the matrix data
 } Matrix;
 
 /**

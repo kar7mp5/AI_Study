@@ -1,5 +1,3 @@
-// forward_convolutionNeuralNetwork.c
-
 #include "matrix.h"
 #include <math.h>
 #include <stdio.h>
@@ -23,7 +21,7 @@ double mse_loss(Matrix *output, Matrix *target) {
     double loss = 0;
     for (int i = 0; i < output->rows; ++i) {
         for (int j = 0; j < output->cols; ++j) {
-            double diff = output->data[i][j] - target->data[i][j];
+            double diff = output->data[i * output->cols + j] - target->data[i * target->cols + j];
             loss += diff * diff;
         }
     }
@@ -42,7 +40,9 @@ double mse_loss(Matrix *output, Matrix *target) {
 void mse_loss_derivative(Matrix *output, Matrix *target, Matrix *d_output) {
     for (int i = 0; i < output->rows; ++i) {
         for (int j = 0; j < output->cols; ++j) {
-            d_output->data[i][j] = 2 * (output->data[i][j] - target->data[i][j]) / (output->rows * output->cols);
+            d_output->data[i * d_output->cols + j] =
+                2 * (output->data[i * output->cols + j] - target->data[i * target->cols + j]) /
+                (output->rows * output->cols);
         }
     }
 }
@@ -57,11 +57,11 @@ void mse_loss_derivative(Matrix *output, Matrix *target, Matrix *d_output) {
 void forward_convolution(Matrix *input, Matrix *filter, Matrix *output) {
     // Validate the matrix format
     if (input->rows != input->cols) {
-        printf("Invaild input matrix format!");
+        printf("Invalid input matrix format!\n");
         return;
     }
     if (filter->rows != filter->cols) {
-        printf("Invaild filter matrix format!");
+        printf("Invalid filter matrix format!\n");
         return;
     }
 
@@ -79,7 +79,7 @@ void forward_convolution(Matrix *input, Matrix *filter, Matrix *output) {
         for (int j = 0; j < output_size; ++j) {
             for (int fi = 0; fi < filter_size; ++fi) {
                 for (int fj = 0; fj < filter_size; ++fj) {
-                    input_matrix.data[i * output_size + j][fi * filter_size + fj] = input->data[i + fi][j + fj];
+                    input_matrix.data[i * output_size + j] = input->data[(i + fi) * input->cols + (j + fj)];
                 }
             }
         }
@@ -88,7 +88,7 @@ void forward_convolution(Matrix *input, Matrix *filter, Matrix *output) {
     // Reallocate the filter matrix to flatten matrix
     for (int fi = 0; fi < filter_size; ++fi) {
         for (int fj = 0; fj < filter_size; ++fj) {
-            filter_matrix.data[fi * filter_size + fj][0] = filter->data[fi][fj];
+            filter_matrix.data[fi * filter_size + fj] = filter->data[fi * filter->cols + fj];
         }
     }
 
@@ -99,11 +99,11 @@ void forward_convolution(Matrix *input, Matrix *filter, Matrix *output) {
     // Reshape output_matrix back into output and apply ReLU
     for (int i = 0; i < output_size; ++i) {
         for (int j = 0; j < output_size; ++j) {
-            output->data[i][j] = relu(output_matrix.data[i * output_size + j][0]);
+            output->data[i * output_size + j] = relu(output_matrix.data[i * output_size + j]);
         }
     }
 
-    // Free intermediate metrix
+    // Free intermediate matrices
     free_matrix(&input_matrix);
     free_matrix(&filter_matrix);
     free_matrix(&output_matrix);
@@ -120,7 +120,7 @@ void forward_convolution(Matrix *input, Matrix *filter, Matrix *output) {
 void update_filter(Matrix *filter, Matrix *d_filter, const double learning_rate) {
     for (int i = 0; i < filter->rows; ++i) {
         for (int j = 0; j < filter->cols; ++j) {
-            filter->data[i][j] -= learning_rate * d_filter->data[i][j];
+            filter->data[i * filter->cols + j] -= learning_rate * d_filter->data[i * d_filter->cols + j];
         }
     }
 }
@@ -140,17 +140,18 @@ void backward_convolution(Matrix *d_output, Matrix *filter, Matrix *d_input, Mat
     // Initialize d_filter
     for (int i = 0; i < d_filter->rows; ++i) {
         for (int j = 0; j < d_filter->cols; ++j) {
-            d_filter->data[i][j] = 0;
+            d_filter->data[i * d_filter->cols + j] = 0;
         }
     }
 
     // Compute d_filter using matmul (flattened_input is not needed)
     for (int i = 0; i < output_size; ++i) {
         for (int j = 0; j < output_size; ++j) {
-            double grad = d_output->data[i][j];
+            double grad = d_output->data[i * d_output->cols + j];
             for (int fi = 0; fi < filter_size; ++fi) {
                 for (int fj = 0; fj < filter_size; ++fj) {
-                    d_filter->data[fi][fj] += grad * d_input->data[i + fi][j + fj];
+                    d_filter->data[fi * d_filter->cols + fj] +=
+                        grad * d_input->data[(i + fi) * d_input->cols + (j + fj)];
                 }
             }
         }
@@ -159,17 +160,17 @@ void backward_convolution(Matrix *d_output, Matrix *filter, Matrix *d_input, Mat
     // Compute d_input (no need for flattened_input)
     for (int i = 0; i < d_input->rows; ++i) {
         for (int j = 0; j < d_input->cols; ++j) {
-            d_input->data[i][j] = 0; // Reset d_input to zero before accumulation
+            d_input->data[i * d_input->cols + j] = 0; // Reset d_input to zero before accumulation
         }
     }
 
     // Backpropagate gradient to input using filter
     for (int i = 0; i < output_size; ++i) {
         for (int j = 0; j < output_size; ++j) {
-            double grad = d_output->data[i][j];
+            double grad = d_output->data[i * d_output->cols + j];
             for (int fi = 0; fi < filter_size; ++fi) {
                 for (int fj = 0; fj < filter_size; ++fj) {
-                    d_input->data[i + fi][j + fj] += grad * filter->data[fi][fj];
+                    d_input->data[(i + fi) * d_input->cols + (j + fj)] += grad * filter->data[fi * filter->cols + fj];
                 }
             }
         }
@@ -198,7 +199,6 @@ void train(Matrix *input, Matrix *target, Matrix *filter, int epochs, double lea
 
     // Training loop
     for (int epoch = 0; epoch < epochs; ++epoch) {
-        // printf("Forward\n");
         // Forward pass
         forward_convolution(input, filter, &output);
 
@@ -206,9 +206,7 @@ void train(Matrix *input, Matrix *target, Matrix *filter, int epochs, double lea
         double loss = mse_loss(&output, target);
 
         // Backward pass
-        // printf("Loss\n");
         mse_loss_derivative(&output, target, &d_output);
-        // printf("Backward\n");
         backward_convolution(&d_output, filter, &d_input, &d_filter);
 
         // Update filter
@@ -265,7 +263,7 @@ int main() {
     printf("\nTrained Filter:\n");
     for (int i = 0; i < filter.rows; ++i) {
         for (int j = 0; j < filter.cols; ++j) {
-            printf("%8.4f ", filter.data[i][j]);
+            printf("%8.4f ", filter.data[i * filter.cols + j]);
         }
         printf("\n");
     }

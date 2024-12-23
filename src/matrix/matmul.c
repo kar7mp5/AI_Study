@@ -22,9 +22,9 @@ void matmul(Matrix *m1, Matrix *m2, Matrix *output) {
     // Perform matrix multiplication
     for (int i = 0; i < m1->rows; ++i) {
         for (int j = 0; j < m2->cols; ++j) {
-            output->data[i][j] = 0;
+            output->data[i * output->cols + j] = 0; // Correct 1D indexing
             for (int k = 0; k < m1->cols; ++k) {
-                output->data[i][j] += m1->data[i][k] * m2->data[k][j];
+                output->data[i * output->cols + j] += m1->data[i * m1->cols + k] * m2->data[k * m2->cols + j];
             }
         }
     }
@@ -37,18 +37,10 @@ Matrix create_matrix(int rows, int cols) {
     m.cols = cols;
 
     // Allocate memory for the matrix
-    m.data = (double **)malloc(rows * sizeof(double *));
+    m.data = (double *)malloc(rows * cols * sizeof(double)); // Allocate a single contiguous block of memory
     if (!m.data) {
-        printf("Failed to allocate memory for matrix rows.\n");
+        printf("Failed to allocate memory for matrix data.\n");
         exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < rows; ++i) {
-        m.data[i] = (double *)calloc(cols, sizeof(double)); // Initialize to 0
-        if (!m.data[i]) {
-            printf("Failed to allocate memory for matrix columns at row %d.\n", i);
-            exit(EXIT_FAILURE);
-        }
     }
 
     return m;
@@ -59,7 +51,7 @@ void initialize_matrix(Matrix *matrix, const double *data) {
     int idx = 0;
     for (int i = 0; i < matrix->rows; ++i) {
         for (int j = 0; j < matrix->cols; ++j) {
-            matrix->data[i][j] = data[idx++];
+            matrix->data[i * matrix->cols + j] = data[idx++]; // Correct 1D indexing
         }
     }
 }
@@ -69,10 +61,7 @@ void free_matrix(Matrix *m) {
     if (!m || !m->data)
         return;
 
-    for (int i = 0; i < m->rows; ++i) {
-        free(m->data[i]);
-    }
-    free(m->data);
+    free(m->data);  // Free the single contiguous block of memory
     m->data = NULL; // Prevent dangling pointer
 }
 
@@ -82,7 +71,7 @@ Matrix transpose_matrix(Matrix *m) {
 
     for (int i = 0; i < m->rows; ++i) {
         for (int j = 0; j < m->cols; ++j) {
-            t.data[j][i] = m->data[i][j];
+            t.data[j * t.cols + i] = m->data[i * m->cols + j]; // Correct 1D indexing
         }
     }
     return t;
@@ -92,7 +81,7 @@ Matrix transpose_matrix(Matrix *m) {
 void print_matrix(Matrix *matrix) {
     for (int i = 0; i < matrix->rows; ++i) {
         for (int j = 0; j < matrix->cols; ++j) {
-            printf("%+8.2f ", matrix->data[i][j]);
+            printf("%+8.2f ", matrix->data[i * matrix->cols + j]); // Correct 1D indexing
         }
         printf("\n");
     }
